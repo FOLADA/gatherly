@@ -62,14 +62,6 @@ const Navbar = () => {
               to="/people" 
               className="text-gray-700 hover:text-primary font-bold px-3 py-2 sm:px-4 sm:py-2 rounded-lg transition-all duration-300 relative group text-sm sm:text-base"
             >
-              შეხვდარი
-              <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-primary group-hover:w-3/4 transition-all duration-300 rounded-full"></span>
-            </Link>
-            
-            <Link 
-              to="/about" 
-              className="text-gray-700 hover:text-primary font-bold px-3 py-2 sm:px-4 sm:py-2 rounded-lg transition-all duration-300 relative group text-sm sm:text-base"
-            >
               გაცნობა
               <span className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-primary group-hover:w-3/4 transition-all duration-300 rounded-full"></span>
             </Link>

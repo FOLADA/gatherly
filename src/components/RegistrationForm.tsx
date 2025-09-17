@@ -2,14 +2,18 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, User, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, User, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import backgroundImage from "@/assets/geometric-background.jpg";
 import gatherlyLogo from "@/assets/GatherlyArched.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase, clearAuthState } from "@/lib/supabaseClient";
+import { toast } from "sonner";
 
 const RegistrationForm = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,9 +25,96 @@ const RegistrationForm = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Validation function to check form inputs
+  const validateForm = (): string | null => {
+    // Check if all fields are filled
+    if (!formData.name.trim()) {
+      return "სახელი აუცილებელია";
+    }
+    
+    if (!formData.email.trim()) {
+      return "ელ-ფოსტა აუცილებელია";
+    }
+    
+    if (!formData.password) {
+      return "პაროლი აუცილებელია";
+    }
+    
+    // Check password length (minimum 6 characters)
+    if (formData.password.length < 6) {
+      return "პაროლი უნდა იყოს მინიმუმ 6 სიმბოლო";
+    }
+    
+    // Check if passwords match
+    if (formData.password !== formData.confirmPassword) {
+      return "პაროლები არ ემთხვევა";
+    }
+    
+    return null;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Registration submitted:", formData);
+    
+    // Validate form inputs
+    const validationError = validateForm();
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+    
+    // Set loading state to show spinner
+    setIsLoading(true);
+    
+    try {
+      // Clear any corrupted auth state before attempting signup
+      await clearAuthState();
+      
+      // Proceed with signup - let Supabase handle duplicate detection
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            name: formData.name, // Store name in user metadata
+          }
+        }
+      });
+      
+      if (error) {
+        // Handle specific Supabase auth errors
+        let errorMessage = "რეგისტრაციისას მოხდა შეცდომა";
+        
+        if (error.message.includes("already registered") || 
+            error.message.includes("User already registered") ||
+            error.message.includes("already exists")) {
+          // User already exists - show Georgian message
+          errorMessage = "თქვენ უკვე გაქვთ ანგარიში, შედით სისტემაში";
+        } else if (error.message.includes("Invalid email")) {
+          errorMessage = "არასწორი ელ-ფოსტის ფორმატი";
+        } else if (error.message.includes("Password")) {
+          errorMessage = "პაროლი ძალიან სუსტია";
+        } else if (error.message.includes("rate limit") || error.message.includes("429")) {
+          errorMessage = "ძალიან ბევრი მცდელობა. სცადეთ რამდენიმე წუთში";
+        }
+        
+        toast.error(errorMessage);
+        return;
+      }
+      
+      if (data.user) {
+        toast.success("რეგისტრაცია წარმატებით დასრულდა!");
+        
+        // Redirect to onboarding page
+        navigate("/onboarding");
+      }
+      
+    } catch (error) {
+      console.error("Signup error:", error);
+      toast.error("რეგისტრაციისას მოხდა შეცდომა. გთხოვთ სცადოთ ხელახლა.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -125,8 +216,16 @@ const RegistrationForm = () => {
             type="submit"
             variant="gatherly"
             className="w-full py-4 text-base font-semibold mt-8"
+            disabled={isLoading}
           >
-            შესვლა
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                რეგისტრაცია...
+              </>
+            ) : (
+              "რეგისტრაცია"
+            )}
           </Button>
 
           {/* Divider */}

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   User, 
   Calendar, 
@@ -23,15 +24,23 @@ import {
   Globe,
   MessageCircle,
   TrendingUp,
-  Award
+  Award,
+  Loader2,
+  Instagram,
+  FileText
 } from "lucide-react";
 import backgroundImage from "@/assets/geometric-background.jpg";
 import gatherlyLogo from "@/assets/GatherlyArched.png";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { supabase, uploadProfileImage, upsertUserProfile, type UserProfile } from "@/lib/supabaseClient";
+import { toast } from "sonner";
 
 const Onboarding = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
-  const totalSteps = 5;
+  const totalSteps = 6; // Updated to include bio step
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   // State for form data
   const [formData, setFormData] = useState({
@@ -39,12 +48,37 @@ const Onboarding = () => {
     age: "",
     gender: "",
     profilePhoto: null as File | null,
+    image_url: "",
+    instagram_profile: "",
+    bio: "",
     hobbies: [] as string[],
     customHobby: "",
     availability: [] as string[],
     personality: {} as Record<string, string>,
     socialLevel: 3,
   });
+
+  // Get current user and pre-fill name if available
+  useEffect(() => {
+    // Handle email confirmation redirect
+    const hash = window.location.hash;
+    if (hash.includes('access_token')) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUser(user);
+        // Pre-fill name from user metadata or email
+        const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '';
+        if (displayName) {
+          setFormData(prev => ({ ...prev, name: displayName }));
+        }
+      }
+    };
+    getCurrentUser();
+  }, []);
 
   const handleInputChange = (field: string, value: string | File | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -62,10 +96,58 @@ const Onboarding = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Onboarding completed:", formData);
-    // Here you would typically make an API call to save the data
+    
+    if (!currentUser) {
+      toast.error('მომხმარებელი არ არის ავტორიზებული');
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.name.trim()) {
+      toast.error('გთხოვთ შეიყვანოთ სახელი');
+      return;
+    }
+    if (!formData.age || parseInt(formData.age) < 1) {
+      toast.error('გთხოვთ შეიყვანოთ სწორი ასაკი');
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+
+      // Prepare user profile data
+      const profileData: Omit<UserProfile, 'created_at' | 'updated_at'> = {
+        id: currentUser.id,
+        name: formData.name.trim(),
+        age: parseInt(formData.age),
+        instagram_profile: formData.instagram_profile.trim() || undefined,
+        bio: formData.bio.trim() || undefined,
+        hobbies: formData.hobbies,
+        availability: formData.availability,
+        personality: formData.personality,
+        image_url: formData.image_url?.trim() || undefined,
+        social_level: formData.socialLevel,
+      };
+
+      // Save to Supabase
+      const result = await upsertUserProfile(profileData);
+      
+      if (result.success) {
+        toast.success('პროფილი წარმატებით შეიქმნა!');
+        // Redirect to home page
+        navigate('/');
+      } else {
+        toast.error(result.error || 'შეცდომა მონაცემების შენახვისას');
+      }
+    } catch (error) {
+      console.error('Error during onboarding:', error);
+      toast.error('მოულოდნელი შეცდომა მოხდა');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Step 1: Basic Details
@@ -137,39 +219,75 @@ const Onboarding = () => {
         </RadioGroup>
       </div>
 
-      {/* Profile Photo Upload */}
+      {/* Profile Photo URL */}
+      <div className="relative">
+        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-placeholder">
+          <Camera className="h-4 w-4" />
+        </div>
+        <Input
+          type="url"
+          placeholder="პროფილის ფოტოს ლინკი (https://...)"
+          value={formData.image_url || ''}
+          onChange={(e) => handleInputChange("image_url", e.target.value)}
+          className="pl-9 pr-3 py-3 bg-input border-input-border rounded-lg text-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+        />
+      </div>
+    </div>
+  );
+
+  // Step 2: Social Media & Bio
+  const renderStep2 = () => (
+    <div className="space-y-4">
+      <div className="text-center mb-4">
+        <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-2">
+          <Instagram className="h-6 w-6 text-white" />
+        </div>
+        <h2 className="font-georgian text-lg font-semibold text-foreground mb-1">
+          სოციალური მედია და ბიო
+        </h2>
+        <p className="font-georgian text-xs text-muted-foreground">
+          მოგვიყევით თქვენს შესახებ მეტი
+        </p>
+      </div>
+
+      {/* Instagram Profile Input */}
+      <div className="relative">
+        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-placeholder">
+          <Instagram className="h-4 w-4" />
+        </div>
+        <Input
+          type="text"
+          placeholder="Instagram პროფილი (@username)"
+          value={formData.instagram_profile}
+          onChange={(e) => handleInputChange("instagram_profile", e.target.value)}
+          className="pl-9 pr-3 py-3 bg-input border-input-border rounded-lg text-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+        />
+      </div>
+
+      {/* Bio Input */}
       <div>
         <Label className="font-georgian text-sm text-foreground mb-2 block flex items-center">
-          <Camera className="mr-1.5 h-4 w-4 text-primary" />
-          პროფილის ფოტო
+          <FileText className="mr-1.5 h-4 w-4 text-primary" />
+          ბიო (მოკლე აღწერა)
         </Label>
-        <div className="flex items-center justify-center w-full">
-          <label className="flex flex-col items-center justify-center w-full h-24 border border-input-border border-dashed rounded-lg cursor-pointer bg-input hover:bg-accent transition-all duration-200 group">
-            <div className="flex flex-col items-center justify-center pt-2 pb-2">
-              <Camera className="w-6 h-6 mb-1 text-text-placeholder group-hover:text-foreground transition-colors duration-200" />
-              <p className="text-xs text-text-placeholder group-hover:text-foreground transition-colors duration-200">
-                <span className="font-semibold">ატვირთეთ ფაილი</span> ან გადაათრიეთ აქ
-              </p>
-              <p className="text-[10px] text-text-placeholder mt-0.5">(PNG ან JPG, მაქს. 5MB)</p>
-            </div>
-            <Input 
-              type="file" 
-              className="hidden" 
-              accept="image/*"
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  handleInputChange("profilePhoto", e.target.files[0]);
-                }
-              }}
-            />
-          </label>
+        <Textarea
+          placeholder="მოგვიყევით თქვენს შესახებ რამდენიმე სიტყვით..."
+          value={formData.bio}
+          onChange={(e) => handleInputChange("bio", e.target.value)}
+          className="min-h-[80px] bg-input border-input-border rounded-lg text-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+          maxLength={200}
+        />
+        <div className="text-right mt-1">
+          <span className="text-xs text-muted-foreground">
+            {formData.bio.length}/200
+          </span>
         </div>
       </div>
     </div>
   );
 
-  // Step 2: Hobbies & Interests
-  const renderStep2 = () => {
+  // Step 3: Hobbies & Interests
+  const renderStep3 = () => {
     const predefinedHobbies = [
       { id: "sports", label: "სპორტი", icon: <TrendingUp className="h-4 w-4" /> },
       { id: "books", label: "წიგნები", icon: <Award className="h-4 w-4" /> },
@@ -305,8 +423,8 @@ const Onboarding = () => {
     );
   };
 
-  // Step 3: Time Availability
-  const renderStep3 = () => {
+  // Step 4: Time Availability
+  const renderStep4 = () => {
     const timeSlots = [
       { id: "weekday_mornings", label: "სამუშაო დღეების დილა", icon: <Clock className="h-4 w-4" /> },
       { id: "weekday_evenings", label: "სამუშაო დღეების საღამო", icon: <Clock className="h-4 w-4" /> },
@@ -366,8 +484,8 @@ const Onboarding = () => {
     );
   };
 
-  // Step 4: Personality Snapshot
-  const renderStep4 = () => {
+  // Step 5: Personality Snapshot
+  const renderStep5 = () => {
     const questions = [
       {
         id: "extroversion",
@@ -441,8 +559,8 @@ const Onboarding = () => {
     );
   };
 
-  // Step 5: Social Integration Level
-  const renderStep5 = () => {
+  // Step 6: Social Integration Level
+  const renderStep6 = () => {
     const levels = [
       { value: 1, label: "მხოლოდ მეგობრებთან" },
       { value: 2, label: "ახლო ნაცნობებთან" },
@@ -584,6 +702,7 @@ const Onboarding = () => {
           {step === 3 && renderStep3()}
           {step === 4 && renderStep4()}
           {step === 5 && renderStep5()}
+          {step === 6 && renderStep6()}
 
           {/* Navigation Buttons */}
           <div className="flex justify-between mt-5">
@@ -612,10 +731,20 @@ const Onboarding = () => {
               <Button
                 type="submit"
                 variant="gatherly"
-                className="py-3 px-4 text-sm font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center"
+                disabled={isLoading}
+                className="py-3 px-4 text-sm font-semibold rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                დასრულება
-                <Check className="ml-1.5 h-3.5 w-3.5" />
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    შენახვა...
+                  </>
+                ) : (
+                  <>
+                    დასრულება
+                    <Check className="ml-1.5 h-3.5 w-3.5" />
+                  </>
+                )}
               </Button>
             )}
           </div>

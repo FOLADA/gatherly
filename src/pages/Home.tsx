@@ -1,68 +1,92 @@
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import React from "react";
 import { Button } from "@/components/ui/button";
+import EventCard from "@/components/EventCard";
+import EventDetailsModal from "@/components/EventDetailsModal";
+import { useEventModal } from "@/hooks/useEventModal";
 import backgroundImage from "@/assets/geometric-background.jpg";
 import theMainImage from "@/assets/EventsPage.png";
 
 const Home = () => {
-  const [favorites, setFavorites] = useState<Record<number, boolean>>({
-    1: true,
-    2: false,
-    3: false,
-    4: false,
-    5: false,
-    6: false,
-  });
-
-  const toggleFavorite = (id: number) => {
-    setFavorites((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
+  const { isOpen, isLoading, error, eventDetails, openModal, closeModal } = useEventModal();
 
   const events = [
     {
       id: 1,
       title: "შეხვედრა",
-      details: "20 აპრილი, 10:00 საათი",
-      subtitle: "დეტალები",
-      image: backgroundImage,
+      date: "20 აპრილი",
+      time: "10:00 საათი",
+      image: {
+        src: backgroundImage,
+        alt: "შეხვედრა"
+      },
+      type: "networking" as const,
+      location: "თბილისი",
+      ctaText: "იხილეთ დეტალები"
     },
     {
       id: 2,
       title: "კონცერტი",
-      details: "4 მაისი, 20:00 საათი",
-      subtitle: "დეტალები",
-      image: backgroundImage,
+      date: "4 მაისი",
+      time: "20:00 საათი",
+      image: {
+        src: backgroundImage,
+        alt: "კონცერტი"
+      },
+      type: "concert" as const,
+      location: "თბილისი",
+      ctaText: "იხილეთ დეტალები"
     },
     {
       id: 3,
       title: "წიგნების საღამოების დღე",
-      details: "24 აპრილი, 19:00 საათი",
-      subtitle: "დეტალები",
-      image: backgroundImage,
+      date: "24 აპრილი",
+      time: "19:00 საათი",
+      image: {
+        src: backgroundImage,
+        alt: "წიგნების საღამოების დღე"
+      },
+      type: "workshop" as const,
+      location: "თბილისი",
+      ctaText: "იხილეთ დეტალები"
     },
     {
       id: 4,
       title: "ფერების ფესტივალი",
-      details: "18 აპრილი, 14:00 საათი",
-      subtitle: "დეტალები",
-      image: backgroundImage,
+      date: "18 აპრილი",
+      time: "14:00 საათი",
+      image: {
+        src: backgroundImage,
+        alt: "ფერების ფესტივალი"
+      },
+      type: "festival" as const,
+      location: "თბილისი",
+      ctaText: "იხილეთ დეტალები"
     },
     {
       id: 5,
       title: "შეხვედრა",
-      details: "30 მაისი, 11:00 საათი",
-      subtitle: "დეტალები",
-      image: backgroundImage,
+      date: "30 მაისი",
+      time: "11:00 საათი",
+      image: {
+        src: backgroundImage,
+        alt: "შეხვედრა"
+      },
+      type: "networking" as const,
+      location: "თბილისი",
+      ctaText: "იხილეთ დეტალები"
     },
     {
       id: 6,
       title: "შეხვედრა",
-      details: "29 აპრილი, 12:00 საათი",
-      subtitle: "დეტალები",
-      image: backgroundImage,
+      date: "29 აპრილი",
+      time: "12:00 საათი",
+      image: {
+        src: backgroundImage,
+        alt: "შეხვედრა"
+      },
+      type: "networking" as const,
+      location: "თბილისი",
+      ctaText: "იხილეთ დეტალები"
     },
   ];
 
@@ -88,15 +112,15 @@ const Home = () => {
 
       {/* Search Bar - Moved below the hero image */}
       <div className="mx-4 sm:mx-6 md:mx-10 -mt-16 sm:-mt-20 relative z-20">
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-4 sm:p-6 max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 items-end">
+        <div className="bg-blue-600 rounded-2xl shadow-xl p-4 sm:p-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 items-end">
             <div>
               <label className="block text-white text-sm font-semibold mb-2">
                 როდის?
               </label>
               <input
                 type="date"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm sm:text-base"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white border-0 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm sm:text-base"
               />
             </div>
             <div>
@@ -105,8 +129,9 @@ const Home = () => {
               </label>
               <select
                 name="category"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm sm:text-base"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white border-0 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm sm:text-base"
               >
+                <option value="">აირჩიეთ კატეგორია</option>
                 <option value="გასართობი">გასართობი</option>
                 <option value="საგანმანათლებლო">საგანმანათლებლო</option>
                 <option value="სოციალური">სოციალური</option>
@@ -115,31 +140,26 @@ const Home = () => {
               </select>
             </div>
             <div>
-              <label className="block text-white text-sm font-semibold mb-2">
-                ადგილი?
-              </label>
-              <input
-                type="text"
-                placeholder="ქალაქი"
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm sm:text-base"
-              />
-            </div>
-            <div>
-              <Button variant="gatherly" className="w-full font-bold py-2 sm:py-3 px-4 rounded-lg flex items-center justify-center text-sm sm:text-base">
+              <button 
+                className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 flex items-center justify-center gap-2 text-sm sm:text-base"
+                type="button"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
                 >
                   <path
-                    fillRule="evenodd"
-                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                    clipRule="evenodd"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
                 </svg>
-                ძიება
-              </Button>
+                <span>ძიება</span>
+              </button>
             </div>
           </div>
         </div>
@@ -151,67 +171,33 @@ const Home = () => {
           <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6 sm:mb-8 text-center">
             მომავალი ღონისძიებები
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-12 md:gap-24">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {events.map((event) => (
-              <Card
+              <EventCard
                 key={event.id}
-                className="overflow-hidden rounded-3xl shadow-lg bg-white"
-              >
-                <div className="relative">
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    className="w-full h-48 sm:h-64 md:h-80 object-cover"
-                  />
-                  <button
-                    onClick={() => toggleFavorite(event.id)}
-                    className="absolute top-3 sm:top-4 right-3 sm:right-4 p-2 sm:p-3 rounded-full bg-white/90 backdrop-blur"
-                  >
-                    {favorites[event.id] ? (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 sm:h-7 sm:w-7 text-red-500"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 sm:h-7 sm:w-7 text-gray-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                        />
-                      </svg>
-                    )}
-                  </button>
-                </div>
-                <CardContent className="p-4 sm:p-6 md:p-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
-                    {event.title}
-                  </h3>
-                  <p className="text-gray-600 text-base sm:text-lg mb-2">{event.details}</p>
-                  <p className="text-gray-500 cursor-pointer underline text-base sm:text-lg mt-3 sm:mt-4">
-                    {event.subtitle}
-                  </p>
-                </CardContent>
-              </Card>
+                id={event.id}
+                title={event.title}
+                date={event.date}
+                time={event.time}
+                image={event.image}
+                type={event.type}
+                location={event.location}
+                ctaText={event.ctaText}
+                onClick={() => openModal(event.id)}
+              />
             ))}
           </div>
         </div>
       </div>
+
+      {/* Event Details Modal */}
+      <EventDetailsModal
+        isOpen={isOpen}
+        onClose={closeModal}
+        eventDetails={eventDetails}
+        isLoading={isLoading}
+        error={error}
+      />
     </div>
   );
 };

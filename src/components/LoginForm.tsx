@@ -2,13 +2,17 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { User, Lock } from "lucide-react";
+import { User, Lock, Loader2 } from "lucide-react";
 import backgroundImage from "@/assets/geometric-background.jpg";
 import gatherlyLogo from "@/assets/GatherlyArched.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { signInWithEmail, clearAuthState } from "@/lib/supabaseClient";
+import { toast } from "sonner";
 
 const LoginForm = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -18,9 +22,71 @@ const LoginForm = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Validation function to check form inputs
+  const validateForm = (): string | null => {
+    if (!formData.email.trim()) {
+      return "ელ-ფოსტა აუცილებელია";
+    }
+    
+    if (!formData.password) {
+      return "პაროლი აუცილებელია";
+    }
+    
+    return null;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login submitted:", formData);
+    
+    // Validate form inputs
+    const validationError = validateForm();
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+    
+    // Set loading state to show spinner
+    setIsLoading(true);
+    
+    try {
+      // Clear any corrupted auth state before attempting login
+      await clearAuthState();
+      
+      // Call Supabase Auth signIn with email and password
+      const { data, error } = await signInWithEmail(formData.email, formData.password);
+      
+      if (error) {
+        // Handle specific authentication errors
+        let errorMessage = "შესვლისას მოხდა შეცდომა";
+        
+        if (error.message.includes("Invalid login credentials") || 
+            error.message.includes("Invalid email or password")) {
+          // User is not registered or wrong credentials
+          errorMessage = "თქვენ არ ხართ დარეგისტრირებული";
+        } else if (error.message.includes("Email not confirmed")) {
+          errorMessage = "გთხოვთ დაადასტუროთ თქვენი ელ-ფოსტა";
+        } else if (error.message.includes("Too many requests") || error.message.includes("429")) {
+          errorMessage = "ძალიან ბევრი მცდელობა. სცადეთ რამდენიმე წუთში";
+        }
+        
+        toast.error(errorMessage);
+        return;
+      }
+      
+      if (data.user) {
+        // Successful login
+        toast.success("წარმატებით შეხვედით სისტემაში!");
+        
+        // Redirect to home page
+        navigate("/");
+      }
+      
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error("შესვლისას მოხდა შეცდომა. გთხოვთ სცადოთ ხელახლა.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -102,8 +168,16 @@ const LoginForm = () => {
             type="submit"
             variant="gatherly"
             className="w-full py-4 text-base font-semibold mt-8"
+            disabled={isLoading}
           >
-            შესვლა
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                შესვლა...
+              </>
+            ) : (
+              "შესვლა"
+            )}
           </Button>
 
           {/* Footer Links */}

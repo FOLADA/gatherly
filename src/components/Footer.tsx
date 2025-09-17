@@ -1,41 +1,56 @@
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Youtube } from "lucide-react";
+import { Facebook, Instagram } from "lucide-react";
+import gatherlyLogo from "@/assets/GatherlyLogo.jpg";
 
 const Footer = () => {
   return (
-    <footer className="bg-white border-t-3 border-t-[#4285f4] py-3 sm:py-4" style={{ height: 'auto', minHeight: '80px' }}>
+    <footer className="bg-gray-50 border-t border-gray-200 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
-          {/* Logo on the left */}
-          <div className="flex items-center">
-            <Link 
-              to="/" 
-              className="text-2xl sm:text-3xl font-bold text-[#264ECA]"
-              style={{ fontFamily: 'serif' }}
-            >
-              Gatherly
-            </Link>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
           
-          {/* Center text - hidden on mobile */}
-          <div className="hidden sm:block text-center">
-            <p className="text-sm sm:text-base font-normal text-[#264ECA]" style={{ fontFamily: 'sans-serif' }}>
-              2025 ყველა უფლება დაცულია
+          {/* Logo and Description */}
+          <div className="flex flex-col items-center md:items-start space-y-4">
+            <Link to="/" className="flex items-center">
+              <img 
+                src={gatherlyLogo} 
+                alt="Gatherly Logo" 
+                className="h-12 w-auto"
+              />
+            </Link>
+            <p className="text-sm text-gray-600 text-center md:text-left max-w-xs">
+              ღონისძიებების აღმოჩენისა და ახალი ადამიანების გაცნობის პლატფორმა პლატფორმა
             </p>
           </div>
-          
-          {/* Social icons on the right */}
-          <div className="flex items-center space-x-3">
-            <a href="#" className="text-[#1877f2] hover:text-blue-700 transition-colors">
-              <Facebook size={20} className="sm:w-6 sm:h-6" />
+
+          {/* Copyright */}
+          <div className="text-center">
+            <p className="text-md text-gray-500">
+              © 2025 Gatherly. ყველა უფლება დაცულია.
+            </p>
+          </div>
+
+          {/* Social Media Links */}
+          <div className="flex justify-center md:justify-end items-center space-x-6">
+            <a 
+              href="https://www.facebook.com/profile.php?id=61581044843816" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-[#1877f2] transition-colors duration-200 group"
+              aria-label="Facebook-ზე გაყევით"
+            >
+              <Facebook size={24} className="group-hover:scale-110 transition-transform duration-200" />
             </a>
-            <a href="#" className="text-[#1da1f2] hover:text-blue-400 transition-colors">
-              <Twitter size={20} className="sm:w-6 sm:h-6" />
-            </a>
-            <a href="#" className="text-[#ff0000] hover:text-red-700 transition-colors">
-              <Youtube size={20} className="sm:w-6 sm:h-6" />
+            <a 
+              href="https://www.instagram.com/_getherly_?igsh=YWo5dWRmbzQ1Mm1v" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-[#E4405F] transition-colors duration-200 group"
+              aria-label="Instagram-ზე გაყევით"
+            >
+              <Instagram size={24} className="group-hover:scale-110 transition-transform duration-200" />
             </a>
           </div>
+
         </div>
       </div>
     </footer>
