@@ -58,7 +58,17 @@ const People = () => {
       
       if (result.success) {
         if (interactionType === 'like') {
-          toast.success(`${targetUser.name}-ს მოგწონთ! 💖`);
+          if (result.isMatch) {
+            toast.success(`🎉 მატჩი! ${targetUser.name}-ს თქვენც მოგწონთ!`, {
+              duration: 4000,
+            });
+          } else {
+            toast.success(`${targetUser.name}-ს მოგწონთ! 💖`);
+          }
+        } else {
+          toast(`${targetUser.name} გამოტოვებულია`, {
+            icon: '👋',
+          });
         }
         
         // Move to next person

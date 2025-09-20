@@ -8,9 +8,13 @@ import { Calendar, Clock, MapPin, Users, Image, Plus, ArrowLeft, Check } from "l
 import backgroundImage from "@/assets/geometric-background.jpg";
 import gatherlyLogo from "@/assets/GatherlyArched.png";
 import { Link, useNavigate } from "react-router-dom";
+import { createEvent } from "@/lib/databaseClient";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const AddEvent = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: "",
     date: "",
@@ -65,22 +69,47 @@ const AddEvent = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
       return;
     }
+
+    if (!user) {
+      toast.error("გთხოვთ შედით სისტემაში");
+      return;
+    }
     
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Event submitted:", formData);
+    try {
+      const eventData = {
+        title: formData.title.trim(),
+        description: formData.description.trim() || "",
+        date: formData.date,
+        time: formData.time,
+        location: formData.location.trim(),
+        category: formData.category,
+        max_participants: formData.maxParticipants ? parseInt(formData.maxParticipants) : undefined,
+        image_url: "", // TODO: Handle image upload later
+        created_by: user.id
+      };
+
+      const result = await createEvent(eventData);
+      
+      if (result.success) {
+        toast.success("ივენთი წარმატებით შეიქმნა!");
+        navigate("/events", { state: { fromAddEvent: true } });
+      } else {
+        toast.error(result.error || "შეცდომა ივენთის შექმნისას");
+      }
+    } catch (error) {
+      console.error("Error creating event:", error);
+      toast.error("მოულოდნელი შეცდომა მოხდა");
+    } finally {
       setIsSubmitting(false);
-      // Show success message and redirect
-      navigate("/events", { state: { fromAddEvent: true } });
-    }, 1500);
+    }
   };
 
   const categories = [

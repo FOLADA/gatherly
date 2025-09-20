@@ -32,7 +32,7 @@ import {
 import backgroundImage from "@/assets/geometric-background.jpg";
 import gatherlyLogo from "@/assets/GatherlyArched.png";
 import { useNavigate } from "react-router-dom";
-import { supabase, uploadProfileImage, upsertUserProfile, type UserProfile } from "@/lib/supabaseClient";
+import { supabase, uploadProfileImage, upsertUserProfile, type UserProfile } from "@/lib/databaseClient";
 import { toast } from "sonner";
 
 const Onboarding = () => {
@@ -41,6 +41,8 @@ const Onboarding = () => {
   const totalSteps = 6; // Updated to include bio step
   const [isLoading, setIsLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   // State for form data
   const [formData, setFormData] = useState({
@@ -63,7 +65,10 @@ const Onboarding = () => {
     // Handle email confirmation redirect
     const hash = window.location.hash;
     if (hash.includes('access_token')) {
+      // Clean up the URL
       window.history.replaceState(null, '', window.location.pathname);
+      // Show confirmation success message
+      toast.success('ელ-ფოსტა წარმატებით დადასტურდა! გთხოვთ შეავსოთ თქვენი პროფილი.');
     }
 
     const getCurrentUser = async () => {
@@ -75,18 +80,85 @@ const Onboarding = () => {
         if (displayName) {
           setFormData(prev => ({ ...prev, name: displayName }));
         }
+      } else {
+        // No authenticated user, redirect to login
+        toast.error('გთხოვთ შედით სისტემაში');
+        navigate('/login');
       }
     };
     getCurrentUser();
-  }, []);
+  }, [navigate]);
+
+  // Validation functions
+  const validateStep = (stepNumber: number): boolean => {
+    const newErrors: Record<string, string> = {};
+    
+    switch (stepNumber) {
+      case 1: // Basic Details
+        if (!formData.name.trim()) {
+          newErrors.name = 'სახელი აუცილებელია';
+        } else if (formData.name.trim().length < 2) {
+          newErrors.name = 'სახელი უნდა იყოს მინიმუმ 2 სიმბოლო';
+        }
+        
+        if (!formData.age) {
+          newErrors.age = 'ასაკი აუცილებელია';
+        } else {
+          const ageNum = parseInt(formData.age);
+          if (isNaN(ageNum) || ageNum < 16 || ageNum > 100) {
+            newErrors.age = 'ასაკი უნდა იყოს 16-დან 100-მდე';
+          }
+        }
+        
+        if (!formData.gender) {
+          newErrors.gender = 'გთხოვთ აირჩიოთ სქესი';
+        }
+        break;
+        
+      case 2: // Bio
+        if (!formData.bio.trim()) {
+          newErrors.bio = 'ბიოგრაფია აუცილებელია';
+        } else if (formData.bio.trim().length < 10) {
+          newErrors.bio = 'ბიოგრაფია უნდა იყოს მინიმუმ 10 სიმბოლო';
+        } else if (formData.bio.trim().length > 200) {
+          newErrors.bio = 'ბიოგრაფია არ უნდა აღემატებოდეს 200 სიმბოლოს';
+        }
+        break;
+        
+      case 3: // Hobbies
+        if (formData.hobbies.length === 0) {
+          newErrors.hobbies = 'გთხოვთ აირჩიოთ მინიმუმ ერთი ჰობი';
+        }
+        break;
+        
+      case 4: // Availability
+        if (formData.availability.length === 0) {
+          newErrors.availability = 'გთხოვთ აირჩიოთ მინიმუმ ერთი ხელმისაწვდომობის დრო';
+        }
+        break;
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (field: string, value: string | File | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    setTouched(prev => ({ ...prev, [field]: true }));
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
   };
 
   const handleNext = () => {
-    if (step < totalSteps) {
-      setStep(step + 1);
+    if (validateStep(step)) {
+      if (step < totalSteps) {
+        setStep(step + 1);
+      }
+    } else {
+      toast.error('გთხოვთ შეავსოთ ყველა აუცილებელი ველი');
     }
   };
 
@@ -104,13 +176,11 @@ const Onboarding = () => {
       return;
     }
 
-    // Validate required fields
-    if (!formData.name.trim()) {
-      toast.error('გთხოვთ შეიყვანოთ სახელი');
-      return;
-    }
-    if (!formData.age || parseInt(formData.age) < 1) {
-      toast.error('გთხოვთ შეიყვანოთ სწორი ასაკი');
+    // Validate all required fields before submission
+    const allStepsValid = [1, 2, 3, 4].every(stepNum => validateStep(stepNum));
+    
+    if (!allStepsValid) {
+      toast.error('გთხოვთ შეავსოთ ყველა აუცილებელი ველი');
       return;
     }
 
@@ -136,9 +206,14 @@ const Onboarding = () => {
       const result = await upsertUserProfile(profileData);
       
       if (result.success) {
-        toast.success('პროფილი წარმატებით შეიქმნა!');
-        // Redirect to home page
-        navigate('/');
+        toast.success('პროფილი წარმატებით შეიქმნა! კეთილი იყოს თქვენი მობრძანება Gatherly-ში!');
+        // Redirect to events page with welcome state
+        navigate('/events', { 
+          state: { 
+            fromOnboarding: true,
+            welcomeMessage: 'თქვენი პროფილი წარმატებით შეიქმნა! ახლა შეგიძლიათ დაიწყოთ ღონისძიებების მოძებნა და ახალი მეგობრების გაცნობა.'
+          } 
+        });
       } else {
         toast.error(result.error || 'შეცდომა მონაცემების შენახვისას');
       }
@@ -175,8 +250,13 @@ const Onboarding = () => {
           placeholder="სახელი"
           value={formData.name}
           onChange={(e) => handleInputChange("name", e.target.value)}
-          className="pl-9 pr-3 py-3 bg-input border-input-border rounded-lg text-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+          className={`pl-9 pr-3 py-3 bg-input border-input-border rounded-lg text-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 ${
+            errors.name ? 'border-red-500 focus:ring-red-500' : ''
+          }`}
         />
+        {errors.name && (
+          <p className="text-red-500 text-xs mt-1 font-georgian">{errors.name}</p>
+        )}
       </div>
 
       {/* Age Input */}
@@ -189,8 +269,13 @@ const Onboarding = () => {
           placeholder="ასაკი"
           value={formData.age}
           onChange={(e) => handleInputChange("age", e.target.value)}
-          className="pl-9 pr-3 py-3 bg-input border-input-border rounded-lg text-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+          className={`pl-9 pr-3 py-3 bg-input border-input-border rounded-lg text-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 ${
+            errors.age ? 'border-red-500 focus:ring-red-500' : ''
+          }`}
         />
+        {errors.age && (
+          <p className="text-red-500 text-xs mt-1 font-georgian">{errors.age}</p>
+        )}
       </div>
 
       {/* Gender Selection */}
@@ -217,20 +302,57 @@ const Onboarding = () => {
             <Label htmlFor="other" className="font-georgian cursor-pointer text-sm">სხვა</Label>
           </div>
         </RadioGroup>
+        {errors.gender && (
+          <p className="text-red-500 text-xs mt-1 font-georgian">{errors.gender}</p>
+        )}
       </div>
 
-      {/* Profile Photo URL */}
-      <div className="relative">
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-placeholder">
-          <Camera className="h-4 w-4" />
+      {/* Profile Photo URL with Preview */}
+      <div className="space-y-3">
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-placeholder">
+            <Camera className="h-4 w-4" />
+          </div>
+          <Input
+            type="url"
+            placeholder="პროფილის ფოტოს ლინკი (https://...)"
+            value={formData.image_url || ''}
+            onChange={(e) => handleInputChange("image_url", e.target.value)}
+            className="pl-9 pr-3 py-3 bg-input border-input-border rounded-lg text-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+          />
         </div>
-        <Input
-          type="url"
-          placeholder="პროფილის ფოტოს ლინკი (https://...)"
-          value={formData.image_url || ''}
-          onChange={(e) => handleInputChange("image_url", e.target.value)}
-          className="pl-9 pr-3 py-3 bg-input border-input-border rounded-lg text-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
-        />
+        
+        {/* Image Preview */}
+        {formData.image_url && (
+          <div className="flex justify-center">
+            <div className="relative">
+              <img
+                src={formData.image_url}
+                alt="Profile Preview"
+                className="w-20 h-20 rounded-full object-cover border-2 border-primary shadow-sm"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
+                onLoad={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'block';
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => handleInputChange("image_url", "")}
+                className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+        )}
+        
+        <p className="text-xs text-muted-foreground text-center font-georgian">
+          ან ატვირთეთ ფოტო სოციალური მედიიდან და დააკოპირეთ ლინკი
+        </p>
       </div>
     </div>
   );
@@ -274,11 +396,16 @@ const Onboarding = () => {
           placeholder="მოგვიყევით თქვენს შესახებ რამდენიმე სიტყვით..."
           value={formData.bio}
           onChange={(e) => handleInputChange("bio", e.target.value)}
-          className="min-h-[80px] bg-input border-input-border rounded-lg text-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+          className={`min-h-[80px] bg-input border-input-border rounded-lg text-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none ${
+            errors.bio ? 'border-red-500 focus:ring-red-500' : ''
+          }`}
           maxLength={200}
         />
-        <div className="text-right mt-1">
-          <span className="text-xs text-muted-foreground">
+        <div className="flex justify-between items-center mt-1">
+          {errors.bio && (
+            <p className="text-red-500 text-xs font-georgian">{errors.bio}</p>
+          )}
+          <span className="text-xs text-muted-foreground ml-auto">
             {formData.bio.length}/200
           </span>
         </div>
@@ -419,6 +546,13 @@ const Onboarding = () => {
             </div>
           </div>
         )}
+        
+        {/* Error display for hobbies */}
+        {errors.hobbies && (
+          <div className="mt-3">
+            <p className="text-red-500 text-xs font-georgian">{errors.hobbies}</p>
+          </div>
+        )}
       </div>
     );
   };
@@ -480,6 +614,13 @@ const Onboarding = () => {
             </button>
           ))}
         </div>
+        
+        {/* Error display for availability */}
+        {errors.availability && (
+          <div className="mt-3">
+            <p className="text-red-500 text-xs font-georgian">{errors.availability}</p>
+          </div>
+        )}
       </div>
     );
   };
@@ -489,9 +630,9 @@ const Onboarding = () => {
     const questions = [
       {
         id: "extroversion",
-        question: "ექსტრავერტული ხართ თუ ინტროვერტული?",
+        question: "ექსტროვერტი ხართ თუ ინტროვერტი?",
         options: [
-          { value: "extrovert", label: "ექსტრავერტი", icon: <Users className="h-4 w-4" /> },
+          { value: "extrovert", label: "ექსტროვერტი", icon: <Users className="h-4 w-4" /> },
           { value: "introvert", label: "ინტროვერტი", icon: <User className="h-4 w-4" /> },
           { value: "ambivert", label: "ამბივერტი", icon: <MessageCircle className="h-4 w-4" /> },
         ]
@@ -500,7 +641,7 @@ const Onboarding = () => {
         id: "planning",
         question: "როგორ ხვდებით გეგმებს?",
         options: [
-          { value: "planner", label: "დამგეგმავი", icon: <Calendar className="h-4 w-4" /> },
+          { value: "planner", label: "დაგეგმილი", icon: <Calendar className="h-4 w-4" /> },
           { value: "spontaneous", label: "სპონტანური", icon: <Star className="h-4 w-4" /> },
         ]
       }
@@ -668,9 +809,9 @@ const Onboarding = () => {
       <div className="absolute inset-0 bg-gradient-background opacity-70"></div>
       
       <Card className="relative z-10 w-full max-w-md bg-card/95 backdrop-blur-sm shadow-xl border-0 rounded-xl p-4">
-        {/* Progress Bar */}
+        {/* Enhanced Progress Bar */}
         <div className="mb-5">
-          <div className="flex justify-between items-center mb-1.5">
+          <div className="flex justify-between items-center mb-2">
             <span className="font-georgian text-xs text-muted-foreground">
               ნაბიჯი {step} / {totalSteps}
             </span>
@@ -678,6 +819,38 @@ const Onboarding = () => {
               {Math.round((step / totalSteps) * 100)}%
             </span>
           </div>
+          
+          {/* Step indicators */}
+          <div className="flex justify-between mb-2">
+            {Array.from({ length: totalSteps }, (_, i) => {
+              const stepNum = i + 1;
+              const isCompleted = stepNum < step;
+              const isCurrent = stepNum === step;
+              const hasError = Object.keys(errors).length > 0 && isCurrent;
+              
+              return (
+                <div
+                  key={stepNum}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-200 ${
+                    isCompleted
+                      ? 'bg-green-500 text-white'
+                      : isCurrent
+                      ? hasError
+                        ? 'bg-red-500 text-white'
+                        : 'bg-primary text-white'
+                      : 'bg-gray-200 text-gray-500'
+                  }`}
+                >
+                  {isCompleted ? (
+                    <Check className="h-3 w-3" />
+                  ) : (
+                    stepNum
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          
           <div className="w-full bg-input-border rounded-full h-1.5">
             <div 
               className="bg-gradient-primary h-1.5 rounded-full transition-all duration-300 ease-in-out" 

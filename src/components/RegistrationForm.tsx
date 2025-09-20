@@ -6,7 +6,7 @@ import { ArrowLeft, User, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react"
 import backgroundImage from "@/assets/geometric-background.jpg";
 import gatherlyLogo from "@/assets/GatherlyArched.png";
 import { Link, useNavigate } from "react-router-dom";
-import { supabase, clearAuthState } from "@/lib/supabaseClient";
+import { signUpWithEmail, clearAuthState } from "@/lib/databaseClient";
 import { toast } from "sonner";
 
 const RegistrationForm = () => {
@@ -14,6 +14,7 @@ const RegistrationForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -70,16 +71,8 @@ const RegistrationForm = () => {
       // Clear any corrupted auth state before attempting signup
       await clearAuthState();
       
-      // Proceed with signup - let Supabase handle duplicate detection
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            name: formData.name, // Store name in user metadata
-          }
-        }
-      });
+      // Proceed with signup
+      const { data, error } = await signUpWithEmail(formData.email, formData.password, formData.name);
       
       if (error) {
         // Handle specific Supabase auth errors
@@ -88,7 +81,6 @@ const RegistrationForm = () => {
         if (error.message.includes("already registered") || 
             error.message.includes("User already registered") ||
             error.message.includes("already exists")) {
-          // User already exists - show Georgian message
           errorMessage = "თქვენ უკვე გაქვთ ანგარიში, შედით სისტემაში";
         } else if (error.message.includes("Invalid email")) {
           errorMessage = "არასწორი ელ-ფოსტის ფორმატი";
@@ -103,10 +95,21 @@ const RegistrationForm = () => {
       }
       
       if (data.user) {
-        toast.success("რეგისტრაცია წარმატებით დასრულდა!");
-        
-        // Redirect to onboarding page
-        navigate("/onboarding");
+        if (data.user.email_confirmed_at) {
+          // User is already confirmed (shouldn't happen with new registrations)
+          toast.success("რეგისტრაცია წარმატებით დასრულდა!");
+          navigate("/onboarding");
+        } else {
+          // User needs to confirm email
+          setEmailSent(true);
+          toast.success(
+            `რეგისტრაცია წარმატებით დასრულდა! გთხოვთ შეამოწმოთ თქვენი ელ-ფოსტა (${formData.email}) და დააჭირეთ დადასტურების ლინკს.`,
+            {
+              duration: 8000, // Show for 8 seconds
+            }
+          );
+          // Don't redirect yet - wait for email confirmation
+        }
       }
       
     } catch (error) {
@@ -253,6 +256,24 @@ const RegistrationForm = () => {
             გაიარეთ Google-ით
           </Button>
         </form>
+
+        {/* Email Confirmation Notice */}
+        {emailSent && (
+          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center">
+              <Mail className="h-5 w-5 text-blue-600 mr-2" />
+              <div>
+                <h3 className="font-georgian text-sm font-semibold text-blue-800">
+                  ელ-ფოსტის დადასტურება
+                </h3>
+                <p className="font-georgian text-xs text-blue-700 mt-1">
+                  დადასტურების ლინკი გაიგზავნა {formData.email}-ზე. 
+                  გთხოვთ შეამოწმოთ თქვენი ელ-ფოსტა და დააჭირეთ ლინკს.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="text-center mt-8 space-y-3">

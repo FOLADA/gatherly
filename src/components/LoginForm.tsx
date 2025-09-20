@@ -6,7 +6,7 @@ import { User, Lock, Loader2 } from "lucide-react";
 import backgroundImage from "@/assets/geometric-background.jpg";
 import gatherlyLogo from "@/assets/GatherlyArched.png";
 import { Link, useNavigate } from "react-router-dom";
-import { signInWithEmail, clearAuthState } from "@/lib/supabaseClient";
+import { signInWithEmail, clearAuthState } from "@/lib/databaseClient";
 import { toast } from "sonner";
 
 const LoginForm = () => {
@@ -61,8 +61,7 @@ const LoginForm = () => {
         
         if (error.message.includes("Invalid login credentials") || 
             error.message.includes("Invalid email or password")) {
-          // User is not registered or wrong credentials
-          errorMessage = "თქვენ არ ხართ დარეგისტრირებული";
+          errorMessage = "არასწორი ელ-ფოსტა ან პაროლი";
         } else if (error.message.includes("Email not confirmed")) {
           errorMessage = "გთხოვთ დაადასტუროთ თქვენი ელ-ფოსტა";
         } else if (error.message.includes("Too many requests") || error.message.includes("429")) {
@@ -76,7 +75,6 @@ const LoginForm = () => {
       if (data.user) {
         // Successful login
         toast.success("წარმატებით შეხვედით სისტემაში!");
-        
         // Redirect to home page
         navigate("/");
       }
