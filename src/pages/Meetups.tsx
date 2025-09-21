@@ -246,7 +246,7 @@ const People = () => {
 
   return (
     <div 
-      className="min-h-screen bg-gradient-background p-4 relative overflow-hidden"
+      className="min-h-screen bg-gradient-background p-3 sm:p-4 relative overflow-hidden safe-area-padding"
       style={{
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: 'cover',
@@ -257,19 +257,19 @@ const People = () => {
       {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-background opacity-70"></div>
       
-      <div className="relative z-10 max-w-md mx-auto pt-8">
+      <div className="relative z-10 max-w-sm sm:max-w-md mx-auto pt-4 sm:pt-6 lg:pt-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white font-georgian mb-2">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-responsive-2xl font-bold text-white font-georgian mb-2">
             ახალი ადამიანები
           </h1>
-          <p className="text-white/80 font-georgian">
+          <p className="text-white/80 font-georgian text-responsive-sm leading-relaxed">
             იპოვეთ საინტერესო ადამიანები თქვენს ირგვლივ
           </p>
         </div>
 
         {/* Card Stack */}
-        <div className="relative h-[600px]">
+        <div className="relative h-[500px] sm:h-[550px] lg:h-[600px]">
           {/* Current Card */}
           <Card
             ref={cardRef}
@@ -288,7 +288,7 @@ const People = () => {
             onTouchEnd={handleTouchEnd}
           >
             {/* Profile Image */}
-            <div className="relative h-80 overflow-hidden">
+            <div className="relative h-64 sm:h-72 lg:h-80 overflow-hidden">
               <img
                 src={currentPerson?.image_url || backgroundImage}
                 alt={currentPerson?.name}
@@ -300,25 +300,26 @@ const People = () => {
               />
               
               {/* Match Percentage Badge */}
-              <div className="absolute top-4 right-4 bg-gradient-primary text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                {currentPerson?.match_percentage || 0}% რამდენად ემთხვევით
+              <div className="absolute top-3 right-3 bg-gradient-primary text-white px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-bold shadow-lg">
+                <span className="hidden xs:inline">{currentPerson?.match_percentage || 0}% რამდენად ემთხვევით</span>
+                <span className="xs:hidden">{currentPerson?.match_percentage || 0}%</span>
               </div>
               
               {/* Age Badge */}
-              <div className="absolute top-4 left-4 bg-white/90 text-gray-800 px-3 py-1 rounded-full text-sm font-semibold shadow-lg">
+              <div className="absolute top-3 left-3 bg-white/90 text-gray-800 px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-semibold shadow-lg">
                 {currentPerson?.age} წლის
               </div>
             </div>
 
             {/* Profile Info */}
-            <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2 font-georgian">
+            <div className="p-4 sm:p-6">
+              <h2 className="text-responsive-xl font-bold text-gray-900 mb-2 font-georgian">
                 {currentPerson?.name}
               </h2>
 
               {/* Bio */}
               {currentPerson?.bio && (
-                <p className="text-gray-700 mb-4 font-georgian leading-relaxed">
+                <p className="text-gray-700 mb-3 sm:mb-4 font-georgian leading-relaxed text-responsive-sm line-clamp-3">
                   {currentPerson.bio}
                 </p>
               )}
@@ -393,28 +394,28 @@ const People = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-center gap-6 mt-8">
+        <div className="flex justify-center gap-4 sm:gap-6 mt-6 sm:mt-8">
           <Button
             onClick={() => handleInteraction('dislike')}
             disabled={actionLoading}
-            className="w-16 h-16 rounded-full bg-white/90 hover:bg-white text-red-500 hover:text-red-600 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/90 hover:bg-white text-red-500 hover:text-red-600 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 touch-target"
           >
             {actionLoading ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
+              <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
             ) : (
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5 sm:h-6 sm:w-6" />
             )}
           </Button>
           
           <Button
             onClick={() => handleInteraction('like')}
             disabled={actionLoading}
-            className="w-16 h-16 rounded-full bg-gradient-primary hover:bg-primary-dark text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+            className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-primary hover:bg-primary-dark text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 touch-target"
           >
             {actionLoading ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
+              <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
             ) : (
-              <Heart className="h-6 w-6" />
+              <Heart className="h-5 w-5 sm:h-6 sm:w-6" />
             )}
           </Button>
         </div>

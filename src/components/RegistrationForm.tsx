@@ -122,7 +122,7 @@ const RegistrationForm = () => {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center p-5 bg-gradient-background relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center p-4 sm:p-5 bg-gradient-background relative overflow-hidden safe-area-padding"
       style={{
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: 'cover',
@@ -133,84 +133,84 @@ const RegistrationForm = () => {
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-gradient-background opacity-60"></div>
       
-      <Card className="relative z-10 w-full max-w-md bg-card shadow-2xl border-0 rounded-2xl p-10">
+      <Card className="relative z-10 w-full max-w-sm sm:max-w-md bg-card shadow-2xl border-0 rounded-responsive p-6 sm:p-8 lg:p-10">
 
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <img 
             src={gatherlyLogo} 
             alt="Gatherly" 
-            className="mx-auto mb-2 h-20 object-contain"
+            className="mx-auto mb-2 h-16 sm:h-20 object-contain"
           />
-          <h2 className="font-georgian text-2xl font-semibold text-foreground mb-2">
+          <h2 className="font-georgian text-responsive-xl font-semibold text-foreground mb-2">
             რეგისტრაცია
           </h2>
-          <p className="font-georgian text-sm text-muted-foreground leading-relaxed">
+          <p className="font-georgian text-responsive-xs text-muted-foreground leading-relaxed">
             დარეგისტრირდი, რათა იპოვო მეგობრები და ივენთები
           </p>
         </div>
 
         {/* Registration Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Name Input */}
           <div className="relative">
-            <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-placeholder" size={20} />
+            <User className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-text-placeholder" size={18} />
             <Input
               type="text"
               placeholder="სახელი"
               value={formData.name}
               onChange={(e) => handleInputChange("name", e.target.value)}
-              className="pl-12 pr-4 py-4 bg-input border-input-border rounded-xl text-base font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-input border-input-border rounded-responsive text-responsive-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent touch-target"
             />
           </div>
 
           {/* Email Input */}
           <div className="relative">
-            <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-placeholder" size={20} />
+            <Mail className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-text-placeholder" size={18} />
             <Input
               type="email"
               placeholder="ელ-ფოსტა"
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
-              className="pl-12 pr-4 py-4 bg-input border-input-border rounded-xl text-base font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-input border-input-border rounded-responsive text-responsive-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent touch-target"
             />
           </div>
 
           {/* Password Input */}
           <div className="relative">
-            <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-placeholder" size={20} />
+            <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-text-placeholder" size={18} />
             <Input
               type={showPassword ? "text" : "password"}
               placeholder="პაროლი"
               value={formData.password}
               onChange={(e) => handleInputChange("password", e.target.value)}
-              className="pl-12 pr-12 py-4 bg-input border-input-border rounded-xl text-base font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 bg-input border-input-border rounded-responsive text-responsive-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent touch-target"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-text-placeholder hover:text-foreground transition-colors"
+              className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-text-placeholder hover:text-foreground transition-colors touch-target p-1"
             >
-              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
 
           {/* Confirm Password Input */}
           <div className="relative">
-            <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-placeholder" size={20} />
+            <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-text-placeholder" size={18} />
             <Input
               type={showConfirmPassword ? "text" : "password"}
               placeholder="გაიმეორეთ პაროლი"
               value={formData.confirmPassword}
               onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-              className="pl-12 pr-12 py-4 bg-input border-input-border rounded-xl text-base font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 bg-input border-input-border rounded-responsive text-responsive-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent touch-target"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-text-placeholder hover:text-foreground transition-colors"
+              className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-text-placeholder hover:text-foreground transition-colors touch-target p-1"
             >
-              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
 
@@ -218,7 +218,7 @@ const RegistrationForm = () => {
           <Button
             type="submit"
             variant="gatherly"
-            className="w-full py-4 text-base font-semibold mt-8"
+            className="w-full py-3 sm:py-4 text-responsive-sm font-semibold mt-6 sm:mt-8 touch-target rounded-responsive"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -232,11 +232,11 @@ const RegistrationForm = () => {
           </Button>
 
           {/* Divider */}
-          <div className="relative my-8">
+          <div className="relative my-6 sm:my-8">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-input-border"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
+            <div className="relative flex justify-center text-responsive-xs">
               <span className="px-4 bg-card text-muted-foreground font-georgian">ან</span>
             </div>
           </div>
@@ -245,7 +245,7 @@ const RegistrationForm = () => {
           <Button
             type="button"
             variant="outline"
-            className="w-full py-4 text-base font-georgian border-input-border hover:bg-accent"
+            className="w-full py-3 sm:py-4 text-responsive-sm font-georgian border-input-border hover:bg-accent touch-target rounded-responsive"
           >
             <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

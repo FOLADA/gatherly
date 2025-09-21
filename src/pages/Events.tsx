@@ -129,26 +129,26 @@ const Events = () => {
 
       {/* Hero Section */}
       <div
-        className="mt-10 mx-4 sm:mx-6 md:mx-10 relative bg-cover rounded-xl bg-center h-[400px] sm:h-[500px] md:h-[600px] flex items-center justify-center"
+        className="mt-6 sm:mt-8 lg:mt-10 mx-4 sm:mx-6 lg:mx-10 relative bg-cover rounded-responsive bg-center h-[300px] xs:h-[350px] sm:h-[400px] md:h-[500px] lg:h-[600px] flex items-center justify-center safe-area-padding"
         style={{
           backgroundImage: `url(${theMainImage})`,
-          borderRadius: "20px",
+          borderRadius: "16px",
         }}
       >
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r rounded-[20px] from-black/80 via-black/60 to-black/40"></div>
+        <div className="absolute inset-0 bg-gradient-to-r rounded-responsive from-black/80 via-black/60 to-black/40"></div>
 
         {/* Hero Content */}
-        <div className="relative z-10 text-center text-white px-4 sm:px-6 max-w-4xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 drop-shadow-lg">აღმოაჩინე ახალი ღონისძიებები</h1>
-          <p className="text-lg sm:text-xl mb-6 sm:mb-8 drop-shadow-md">შეხვდი ახალ ადამიანებს და იპოვე სასურველი ღონისძიება</p>
+        <div className="relative z-10 text-center text-white px-responsive max-w-4xl mx-auto">
+          <h1 className="font-georgian text-responsive-3xl font-bold mb-4 sm:mb-6 drop-shadow-lg leading-tight">აღმოაჩინე ახალი ღონისძიებები</h1>
+          <p className="font-georgian text-responsive-lg mb-6 sm:mb-8 drop-shadow-md leading-relaxed max-w-2xl mx-auto">შეხვდი ახალ ადამიანებს და იპოვე სასურველი ღონისძიება</p>
         </div>
       </div>
 
       {/* Enhanced Search Bar */}
-      <div className="mx-4 sm:mx-6 md:mx-10 -mt-16 sm:-mt-20 relative z-20">
-        <div className="bg-blue-600 rounded-2xl shadow-xl p-4 sm:p-6 max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 items-end">
+      <div className="mx-4 sm:mx-6 lg:mx-10 -mt-12 sm:-mt-16 lg:-mt-20 relative z-20 safe-area-padding">
+        <div className="bg-blue-600 rounded-responsive shadow-xl p-responsive max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-end">
             {/* Search Input */}
             <div>
               <label className="block text-white text-sm font-semibold mb-2 font-georgian">
@@ -159,7 +159,7 @@ const Events = () => {
                 placeholder="ღონისძიების სახელი..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white border-0 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm sm:text-base font-georgian"
+                className="w-full px-3 py-3 sm:px-4 sm:py-3 rounded-lg bg-white border-0 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-300 text-responsive-sm font-georgian touch-target"
               />
             </div>
             
@@ -172,7 +172,7 @@ const Events = () => {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white border-0 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm sm:text-base"
+                className="w-full px-3 py-3 sm:px-4 sm:py-3 rounded-lg bg-white border-0 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-300 text-responsive-sm touch-target"
               />
             </div>
             
@@ -184,7 +184,7 @@ const Events = () => {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg bg-white border-0 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 text-sm sm:text-base font-georgian"
+                className="w-full px-3 py-3 sm:px-4 sm:py-3 rounded-lg bg-white border-0 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 text-responsive-sm font-georgian touch-target"
               >
                 <option value="">ყველა კატეგორია</option>
                 <option value="გასართობი">გასართობი</option>
@@ -197,14 +197,14 @@ const Events = () => {
             </div>
             
             {/* Clear Filters Button */}
-            <div>
+            <div className="xs:col-span-2 lg:col-span-1">
               <button 
                 onClick={() => {
                   setSearchQuery('');
                   setSelectedCategory('');
                   setSelectedDate('');
                 }}
-                className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2 sm:py-3 px-4 sm:px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 flex items-center justify-center gap-2 text-sm sm:text-base font-georgian"
+                className="w-full bg-blue-700 hover:bg-blue-800 text-white font-semibold py-3 sm:py-3 px-4 sm:px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 flex items-center justify-center gap-2 text-responsive-sm font-georgian touch-target"
                 type="button"
               >
                 <svg
@@ -229,13 +229,13 @@ const Events = () => {
       </div>
 
       {/* Event Cards */}
-      <div className="py-12 sm:py-16 px-4 sm:px-6 bg-gray-50">
+      <div className="py-responsive px-responsive bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-6 sm:mb-8">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 font-georgian">
+          <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center mb-6 sm:mb-8 gap-2">
+            <h2 className="text-responsive-xl font-bold text-gray-900 font-georgian">
               მომავალი ღონისძიებები
             </h2>
-            <div className="text-sm text-gray-600 font-georgian">
+            <div className="text-responsive-xs text-gray-600 font-georgian">
               {eventsLoading ? (
                 'იტვირთება...'
               ) : (
@@ -243,7 +243,7 @@ const Events = () => {
               )}
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-responsive-1-2-3 gap-responsive">
             {eventsLoading ? (
               // Loading skeleton
               Array.from({ length: 6 }).map((_, i) => (
@@ -326,14 +326,14 @@ const Events = () => {
       </div>
 
       {/* Add Event Button */}
-      <div className="fixed bottom-6 right-6 z-40 sm:bottom-8 sm:right-8">
+      <div className="fixed bottom-4 right-4 z-40 sm:bottom-6 sm:right-6 lg:bottom-8 lg:right-8 safe-area-padding">
         <Button 
           asChild 
           variant="gatherly" 
-          className="rounded-full w-14 h-14 sm:w-16 sm:h-16 p-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+          className="rounded-full w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 p-0 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 touch-target"
         >
           <Link to="/add-event">
-            <Plus className="h-6 w-6 sm:h-7 sm:w-7" />
+            <Plus className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7" />
             <span className="sr-only">დაამატე ივენთი</span>
           </Link>
         </Button>

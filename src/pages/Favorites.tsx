@@ -68,9 +68,9 @@ const Favorites = () => {
   };
 
   const ProfileCard = ({ profile }: { profile: PublicUserProfile }) => (
-    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white/95 backdrop-blur-sm">
+    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white/95 backdrop-blur-sm rounded-responsive">
       {/* Profile Image */}
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-40 sm:h-44 lg:h-48 overflow-hidden">
         <img
           src={profile.image_url || backgroundImage}
           alt={profile.name}
@@ -82,23 +82,23 @@ const Favorites = () => {
         />
         
         {/* Match Percentage Badge */}
-        <div className="absolute top-3 right-3 bg-gradient-primary text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-gradient-primary text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
           {profile.match_percentage || 0}%
         </div>
         
         {/* Liked Badge */}
-        <div className="absolute top-3 left-3 bg-red-500 text-white p-1.5 rounded-full shadow-lg">
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-red-500 text-white p-1 sm:p-1.5 rounded-full shadow-lg">
           <Heart className="h-3 w-3 fill-current" />
         </div>
         
         {/* Age Badge */}
-        <div className="absolute bottom-3 left-3 bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold">
+        <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold">
           {profile.age} წლის
         </div>
       </div>
 
       {/* Profile Info */}
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
         <h3 className="text-lg font-bold text-gray-900 mb-2 font-georgian truncate">
           {profile.name}
         </h3>
@@ -223,7 +223,7 @@ const Favorites = () => {
 
   return (
     <div 
-      className="min-h-screen bg-gradient-background p-4 relative"
+      className="min-h-screen bg-gradient-background p-3 sm:p-4 relative safe-area-padding"
       style={{
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: 'cover',
@@ -236,11 +236,11 @@ const Favorites = () => {
       
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8 pt-8">
-          <h1 className="text-3xl font-bold text-white font-georgian mb-2">
+        <div className="text-center mb-6 sm:mb-8 pt-4 sm:pt-6 lg:pt-8">
+          <h1 className="text-responsive-2xl font-bold text-white font-georgian mb-2">
             ჩემი ფავორიტები
           </h1>
-          <p className="text-white/80 font-georgian">
+          <p className="text-white/80 font-georgian text-responsive-sm leading-relaxed">
             ადამიანები რომლებიც მოგწონთ
           </p>
         </div>
@@ -290,19 +290,19 @@ const Favorites = () => {
             </div>
 
             {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-responsive-1-2-4 gap-responsive">
               {favorites.map((profile) => (
                 <ProfileCard key={profile.id} profile={profile} />
               ))}
             </div>
 
             {/* Bottom Actions */}
-            <div className="mt-12 text-center">
-              <div className="space-y-3 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center">
-                <Button asChild variant="gatherly" className="font-georgian">
+            <div className="mt-8 sm:mt-12 text-center">
+              <div className="flex flex-col xs:flex-row gap-3 sm:gap-4 justify-center max-w-md xs:max-w-none mx-auto">
+                <Button asChild variant="gatherly" className="font-georgian touch-target">
                   <Link to="/people">მეტი ადამიანის ნახვა</Link>
                 </Button>
-                <Button asChild variant="outline" className="font-georgian bg-white/10 border-white/20 text-white hover:bg-white/20">
+                <Button asChild variant="outline" className="font-georgian bg-white/10 border-white/20 text-white hover:bg-white/20 touch-target">
                   <Link to="/dashboard">მართვის პანელი</Link>
                 </Button>
               </div>

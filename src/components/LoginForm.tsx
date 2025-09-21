@@ -89,7 +89,7 @@ const LoginForm = () => {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center p-5 bg-gradient-background relative overflow-hidden"
+      className="min-h-screen flex items-center justify-center p-4 sm:p-5 bg-gradient-background relative overflow-hidden safe-area-padding"
       style={{
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: 'cover',
@@ -100,50 +100,50 @@ const LoginForm = () => {
       {/* Overlay for better text readability */}
       <div className="absolute inset-0 bg-gradient-background opacity-60"></div>
       
-      <Card className="relative z-10 w-full max-w-md bg-card shadow-2xl border-0 rounded-2xl p-10">
+      <Card className="relative z-10 w-full max-w-sm sm:max-w-md bg-card shadow-2xl border-0 rounded-responsive p-6 sm:p-8 lg:p-10">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <img 
             src={gatherlyLogo} 
             alt="Gatherly" 
-            className="mx-auto mb-1 h-20 object-contain"
+            className="mx-auto mb-2 h-16 sm:h-20 object-contain"
           />
-          <h2 className="font-georgian text-2xl font-semibold text-foreground mb-3">
+          <h2 className="font-georgian text-responsive-xl font-semibold text-foreground mb-2 sm:mb-3">
             ავტორიზაცია
           </h2>
-          <p className="font-georgian text-sm text-muted-foreground leading-relaxed">
+          <p className="font-georgian text-responsive-xs text-muted-foreground leading-relaxed">
             შედი სისტემაში, რათა იპოვო მეგობრები და ივენთები
           </p>
         </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
           {/* Email Input */}
           <div className="relative">
-            <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-placeholder" size={20} />
+            <User className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-text-placeholder" size={18} />
             <Input
               type="email"
               placeholder="ემაილი"
               value={formData.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
-              className="pl-12 pr-4 py-4 bg-input border-input-border rounded-xl text-base font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-input border-input-border rounded-responsive text-responsive-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent touch-target"
             />
           </div>
 
           {/* Password Input */}
           <div className="relative">
-            <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-placeholder" size={20} />
+            <Lock className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-text-placeholder" size={18} />
             <Input
               type={showPassword ? "text" : "password"}
               placeholder="პაროლი"
               value={formData.password}
               onChange={(e) => handleInputChange("password", e.target.value)}
-              className="pl-12 pr-12 py-4 bg-input border-input-border rounded-xl text-base font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="pl-10 sm:pl-12 pr-10 sm:pr-12 py-3 sm:py-4 bg-input border-input-border rounded-responsive text-responsive-sm font-georgian placeholder:text-text-placeholder focus:ring-2 focus:ring-primary focus:border-transparent touch-target"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-text-placeholder hover:text-foreground transition-colors"
+              className="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-text-placeholder hover:text-foreground transition-colors touch-target p-1"
             >
               {showPassword ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -165,7 +165,7 @@ const LoginForm = () => {
           <Button
             type="submit"
             variant="gatherly"
-            className="w-full py-4 text-base font-semibold mt-8"
+            className="w-full py-3 sm:py-4 text-responsive-sm font-semibold mt-6 sm:mt-8 touch-target rounded-responsive"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -179,9 +179,9 @@ const LoginForm = () => {
           </Button>
 
           {/* Footer Links */}
-          <div className="text-center mt-8 space-y-3">
+          <div className="text-center mt-6 sm:mt-8 space-y-3">
             <Link to={"/register"}>
-            <button className="text-primary text-sm font-georgian underline hover:text-primary-dark transition-colors">
+            <button className="text-primary text-responsive-xs font-georgian underline hover:text-primary-dark transition-colors touch-target p-2">
               არ არ ხარ წევრი? გაიარე რეგისტრაცია!
             </button>
             </Link>

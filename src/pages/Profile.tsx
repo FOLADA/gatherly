@@ -220,7 +220,7 @@ const Profile = () => {
 
   return (
     <div 
-      className="min-h-screen bg-gradient-background p-4 relative"
+      className="min-h-screen bg-gradient-background p-3 sm:p-4 relative safe-area-padding"
       style={{
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: 'cover',
@@ -233,12 +233,12 @@ const Profile = () => {
       
       <div className="relative z-10 max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white font-georgian mb-2">
+            <h1 className="text-responsive-2xl font-bold text-white font-georgian mb-2">
               ჩემი პროფილი
             </h1>
-            <p className="text-white/80 font-georgian">
+            <p className="text-white/80 font-georgian text-responsive-sm leading-relaxed">
               მართეთ თქვენი პროფილის ინფორმაცია
             </p>
           </div>
@@ -247,18 +247,18 @@ const Profile = () => {
             <Button 
               onClick={() => setIsEditing(true)}
               variant="gatherly" 
-              className="font-georgian"
+              className="font-georgian touch-target w-full sm:w-auto"
             >
               <Edit3 className="h-4 w-4 mr-2" />
               რედაქტირება
             </Button>
           ) : (
-            <div className="flex gap-2">
+            <div className="flex flex-col xs:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
               <Button 
                 onClick={handleSave}
                 disabled={saving}
                 variant="gatherly" 
-                className="font-georgian"
+                className="font-georgian touch-target"
               >
                 {saving ? (
                   <>
@@ -279,7 +279,7 @@ const Profile = () => {
                   fetchUserProfile(); // Reset form
                 }}
                 variant="outline" 
-                className="font-georgian bg-white/10 border-white/20 text-white hover:bg-white/20"
+                className="font-georgian bg-white/10 border-white/20 text-white hover:bg-white/20 touch-target"
               >
                 <X className="h-4 w-4 mr-2" />
                 გაუქმება
@@ -288,15 +288,15 @@ const Profile = () => {
           )}
         </div>
 
-        <div className="grid gap-6">
+        <div className="grid gap-4 sm:gap-6">
           {/* Basic Information */}
-          <Card className="p-6 bg-white/95 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold font-georgian mb-4 flex items-center">
-              <User className="h-5 w-5 mr-2 text-primary" />
+          <Card className="p-4 sm:p-6 bg-white/95 backdrop-blur-sm rounded-responsive">
+            <h2 className="text-responsive-lg font-semibold font-georgian mb-4 flex items-center">
+              <User className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-primary" />
               ძირითადი ინფორმაცია
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Name */}
               <div>
                 <Label className="font-georgian text-sm text-foreground mb-2 block">
@@ -409,27 +409,27 @@ const Profile = () => {
           </Card>
 
           {/* Hobbies & Interests */}
-          <Card className="p-6 bg-white/95 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold font-georgian mb-4 flex items-center">
-              <Heart className="h-5 w-5 mr-2 text-primary" />
+          <Card className="p-4 sm:p-6 bg-white/95 backdrop-blur-sm rounded-responsive">
+            <h2 className="text-responsive-lg font-semibold font-georgian mb-4 flex items-center">
+              <Heart className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-primary" />
               ინტერესები და ჰობი
             </h2>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {predefinedHobbies.map((hobby) => (
                 <button
                   key={hobby.id}
                   type="button"
                   disabled={!isEditing}
                   onClick={() => toggleHobby(hobby.id)}
-                  className={`p-3 rounded-lg text-sm font-georgian transition-all duration-200 flex flex-col items-center justify-center border-2 ${
+                  className={`p-3 sm:p-4 rounded-responsive text-responsive-xs font-georgian transition-all duration-200 flex flex-col items-center justify-center border-2 touch-target ${
                     formData.hobbies.includes(hobby.id)
                       ? "bg-gradient-primary text-white border-transparent shadow-md"
                       : "bg-input border-input-border text-foreground hover:bg-accent hover:border-primary"
                   } ${!isEditing ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
                   <div className="mb-1">{hobby.icon}</div>
-                  {hobby.label}
+                  <span className="text-center leading-tight">{hobby.label}</span>
                   {formData.hobbies.includes(hobby.id) && (
                     <Check className="h-3 w-3 mt-1" />
                   )}
@@ -439,31 +439,31 @@ const Profile = () => {
           </Card>
 
           {/* Availability */}
-          <Card className="p-6 bg-white/95 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold font-georgian mb-4 flex items-center">
-              <Clock className="h-5 w-5 mr-2 text-primary" />
+          <Card className="p-4 sm:p-6 bg-white/95 backdrop-blur-sm rounded-responsive">
+            <h2 className="text-responsive-lg font-semibold font-georgian mb-4 flex items-center">
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-primary" />
               ხელმისაწვდომობა
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {timeSlots.map((slot) => (
                 <button
                   key={slot.id}
                   type="button"
                   disabled={!isEditing}
                   onClick={() => toggleAvailability(slot.id)}
-                  className={`p-4 rounded-lg text-sm font-georgian transition-all duration-200 flex items-center border-2 ${
+                  className={`p-3 sm:p-4 rounded-responsive text-responsive-xs font-georgian transition-all duration-200 flex items-center border-2 touch-target ${
                     formData.availability.includes(slot.id)
                       ? "bg-gradient-primary text-white border-transparent shadow-md"
                       : "bg-input border-input-border text-foreground hover:bg-accent hover:border-primary"
                   } ${!isEditing ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                 >
-                  <div className="mr-3 p-1 rounded-md bg-white/20">
+                  <div className="mr-2 sm:mr-3 p-1 rounded-md bg-white/20 flex-shrink-0">
                     {slot.icon}
                   </div>
-                  <span className="flex-1">{slot.label}</span>
+                  <span className="flex-1 text-left leading-tight">{slot.label}</span>
                   {formData.availability.includes(slot.id) && (
-                    <Check className="ml-auto h-4 w-4" />
+                    <Check className="ml-auto h-4 w-4 flex-shrink-0" />
                   )}
                 </button>
               ))}
@@ -471,27 +471,27 @@ const Profile = () => {
           </Card>
 
           {/* Social Level */}
-          <Card className="p-6 bg-white/95 backdrop-blur-sm">
-            <h2 className="text-xl font-semibold font-georgian mb-4 flex items-center">
-              <Users className="h-5 w-5 mr-2 text-primary" />
+          <Card className="p-4 sm:p-6 bg-white/95 backdrop-blur-sm rounded-responsive">
+            <h2 className="text-responsive-lg font-semibold font-georgian mb-4 flex items-center">
+              <Users className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-primary" />
               სოციალური დონე
             </h2>
             
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground font-georgian">
+              <p className="text-responsive-xs text-muted-foreground font-georgian leading-relaxed">
                 რამდენად სოციალური ხართ? (1 - ინტროვერტი, 5 - ექსტროვერტი)
               </p>
               
-              <div className="flex items-center space-x-4">
-                <span className="text-sm font-georgian">ინტროვერტი</span>
-                <div className="flex-1 flex justify-between items-center">
+              <div className="flex flex-col xs:flex-row items-center space-y-3 xs:space-y-0 xs:space-x-3 sm:space-x-4">
+                <span className="text-responsive-xs font-georgian text-center xs:text-left">ინტროვერტი</span>
+                <div className="flex-1 flex justify-center xs:justify-between items-center gap-2 xs:gap-1">
                   {[1, 2, 3, 4, 5].map((level) => (
                     <button
                       key={level}
                       type="button"
                       disabled={!isEditing}
                       onClick={() => handleInputChange("social_level", level)}
-                      className={`w-8 h-8 rounded-full border-2 transition-all duration-200 ${
+                      className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 transition-all duration-200 touch-target text-responsive-xs font-semibold ${
                         formData.social_level >= level
                           ? "bg-gradient-primary border-transparent text-white"
                           : "border-input-border hover:border-primary"
@@ -501,7 +501,7 @@ const Profile = () => {
                     </button>
                   ))}
                 </div>
-                <span className="text-sm font-georgian">ექსტროვერტი</span>
+                <span className="text-responsive-xs font-georgian text-center xs:text-right">ექსტროვერტი</span>
               </div>
             </div>
           </Card>

@@ -161,7 +161,7 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/60 backdrop-blur-sm safe-area-padding"
       onClick={handleOverlayClick}
       role="dialog"
       aria-modal="true"
@@ -169,19 +169,20 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
     >
       <div 
         ref={modalRef}
-        className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden relative shadow-2xl"
+        className="bg-white rounded-t-2xl sm:rounded-2xl max-w-2xl w-full h-full sm:h-auto sm:max-h-[90vh] relative shadow-2xl flex flex-col mt-auto sm:mt-0 sm:m-4"
       >
         {/* Close Button */}
         <button
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 hover:bg-white border-0 cursor-pointer z-10 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 rounded-full bg-white/90 hover:bg-white border-0 cursor-pointer z-10 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg touch-target"
           onClick={onClose}
           aria-label="დახურვა"
         >
-          <X size={20} className="text-gray-600" />
+          <X size={18} className="sm:w-5 sm:h-5 text-gray-600" />
         </button>
 
         {/* Modal Content */}
-        <div className="h-full overflow-auto">
+        <div className="flex-1 overflow-y-auto scroll-container hide-scrollbar"
+             style={{ WebkitOverflowScrolling: 'touch' }}>
           {isLoading ? (
             <div className="flex items-center justify-center h-96">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -194,37 +195,37 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
           ) : eventDetails ? (
             <>
               {/* Hero Image */}
-              <div className="relative h-64 overflow-hidden">
+              <div className="relative h-48 sm:h-56 lg:h-64 overflow-hidden flex-shrink-0">
                 <img
                   src={eventDetails.image_url || backgroundImage}
                   alt={eventDetails.title}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-                <div className="absolute bottom-4 left-4 text-white">
-                  <span className="bg-primary px-3 py-1 rounded-full text-sm font-georgian">
+                <div className="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 text-white">
+                  <span className="bg-primary px-2 py-1 sm:px-3 sm:py-1 rounded-full text-xs sm:text-sm font-georgian">
                     {eventDetails.category}
                   </span>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="p-6">
+              <div className="p-4 sm:p-6 flex-1">
                 {/* Title */}
-                <h2 id="modal-title" className="text-2xl font-bold text-gray-900 mb-4 font-georgian">
+                <h2 id="modal-title" className="text-responsive-xl font-bold text-gray-900 mb-4 font-georgian leading-tight">
                   {eventDetails.title}
                 </h2>
 
                 {/* Quick Info Grid */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6">
                   {/* Date & Time */}
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Calendar size={16} className="text-blue-600" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Calendar size={14} className="sm:w-4 sm:h-4 text-blue-600" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <div className="text-xs text-gray-500 font-georgian">თარიღი და დრო</div>
-                      <div className="text-sm font-semibold text-gray-900 font-georgian">
+                      <div className="text-responsive-xs font-semibold text-gray-900 font-georgian truncate">
                         {new Date(eventDetails.date).toLocaleDateString('ka-GE')} • {eventDetails.time}
                       </div>
                     </div>
@@ -232,12 +233,12 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
 
                   {/* Location */}
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                      <MapPin size={16} className="text-orange-600" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <MapPin size={14} className="sm:w-4 sm:h-4 text-orange-600" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <div className="text-xs text-gray-500 font-georgian">მდებარეობა</div>
-                      <div className="text-sm font-semibold text-gray-900 font-georgian">
+                      <div className="text-responsive-xs font-semibold text-gray-900 font-georgian truncate">
                         {eventDetails.location}
                       </div>
                     </div>
@@ -245,12 +246,12 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
 
                   {/* Participants */}
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <Users size={16} className="text-green-600" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Users size={14} className="sm:w-4 sm:h-4 text-green-600" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <div className="text-xs text-gray-500 font-georgian">მონაწილეები</div>
-                      <div className="text-sm font-semibold text-gray-900 font-georgian">
+                      <div className="text-responsive-xs font-semibold text-gray-900 font-georgian">
                         {participantCount} {eventDetails.max_participants ? `/ ${eventDetails.max_participants}` : ''}
                       </div>
                     </div>
@@ -258,12 +259,12 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
 
                   {/* Duration */}
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                      <Clock size={16} className="text-purple-600" />
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Clock size={14} className="sm:w-4 sm:h-4 text-purple-600" />
                     </div>
-                    <div>
+                    <div className="min-w-0 flex-1">
                       <div className="text-xs text-gray-500 font-georgian">ხანგრძლივობა</div>
-                      <div className="text-sm font-semibold text-gray-900 font-georgian">
+                      <div className="text-responsive-xs font-semibold text-gray-900 font-georgian">
                         2-3 საათი
                       </div>
                     </div>
@@ -273,8 +274,8 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
                 {/* Description */}
                 {eventDetails.description && (
                   <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3 font-georgian">აღწერა</h3>
-                    <div className="text-gray-700 leading-relaxed font-georgian">
+                    <h3 className="text-responsive-base font-semibold text-gray-900 mb-3 font-georgian">აღწერა</h3>
+                    <div className="text-gray-700 leading-relaxed font-georgian text-responsive-sm">
                       {eventDetails.description}
                     </div>
                   </div>
@@ -282,11 +283,11 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
 
                 {/* Action Buttons */}
                 {user ? (
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 sticky bottom-0 bg-white pt-4 pb-2 sm:pb-0 sm:static sm:bg-transparent sm:pt-0">
                     <Button
                       onClick={handleJoinLeave}
                       disabled={joinLoading}
-                      className={`flex-1 py-3 font-georgian ${
+                      className={`flex-1 py-3 sm:py-4 font-georgian touch-target text-responsive-sm ${
                         isJoined 
                           ? 'bg-red-600 hover:bg-red-700' 
                           : 'bg-primary hover:bg-primary-dark'
@@ -303,11 +304,11 @@ const EventDetailsModal: React.FC<EventDetailsModalProps> = ({
                     </Button>
                   </div>
                 ) : (
-                  <div className="text-center">
-                    <p className="text-gray-600 font-georgian mb-3">
+                  <div className="text-center sticky bottom-0 bg-white pt-4 pb-2 sm:pb-0 sm:static sm:bg-transparent sm:pt-0">
+                    <p className="text-gray-600 font-georgian mb-3 text-responsive-sm leading-relaxed">
                       ღონისძიებაში მონაწილეობისთვის გთხოვთ შედით სისტემაში
                     </p>
-                    <Button asChild variant="gatherly" className="font-georgian">
+                    <Button asChild variant="gatherly" className="font-georgian touch-target text-responsive-sm py-3 sm:py-4">
                       <a href="/login">შესვლა</a>
                     </Button>
                   </div>

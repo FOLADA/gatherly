@@ -44,9 +44,9 @@ const Navbar = () => {
   }, [isMenuOpen, isUserMenuOpen]);
 
   return (
-    <nav className="bg-white/90 backdrop-blur-lg shadow-md border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
+    <nav className="bg-white/90 backdrop-blur-lg shadow-md border-b border-gray-200 sticky top-0 z-50 safe-area-padding">
+      <div className="max-w-7xl mx-auto px-responsive">
+        <div className="flex justify-between h-14 sm:h-16 items-center">
           {/* Left side - Text Logo with animation */}
           <div className="flex items-center">
             <Link 
@@ -61,9 +61,10 @@ const Navbar = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 hover:text-primary focus:outline-none"
+              className="text-gray-700 hover:text-primary focus:outline-none touch-target p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label={isMenuOpen ? "მენიუს დახურვა" : "მენიუს გახსნა"}
             >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
 
@@ -168,10 +169,10 @@ const Navbar = () => {
 
         {/* Mobile menu */}
         {isMenuOpen && (
-          <div ref={menuRef} className="md:hidden py-4 px-2 space-y-2 absolute top-full left-0 right-0 bg-white shadow-lg border-t border-gray-200 z-50">
+          <div ref={menuRef} className="md:hidden py-4 px-4 space-y-1 absolute top-full left-0 right-0 bg-white/95 backdrop-blur-lg shadow-xl border-t border-gray-200 z-50 safe-area-padding">
             <Link 
               to="/events" 
-              className="block text-gray-700 hover:text-primary font-bold px-4 py-2 rounded-lg transition-all duration-300 text-base font-georgian"
+              className="block text-gray-700 hover:text-primary font-bold px-4 py-3 rounded-lg transition-all duration-300 text-base font-georgian touch-target hover:bg-gray-50"
               onClick={() => setIsMenuOpen(false)}
             >
               ივენთები
@@ -179,7 +180,7 @@ const Navbar = () => {
             
             <Link 
               to="/people" 
-              className="block text-gray-700 hover:text-primary font-bold px-4 py-2 rounded-lg transition-all duration-300 text-base font-georgian"
+              className="block text-gray-700 hover:text-primary font-bold px-4 py-3 rounded-lg transition-all duration-300 text-base font-georgian touch-target hover:bg-gray-50"
               onClick={() => setIsMenuOpen(false)}
             >
               გაცნობა
@@ -189,7 +190,7 @@ const Navbar = () => {
               <>
                 <Link 
                   to="/dashboard" 
-                  className="block text-gray-700 hover:text-primary font-bold px-4 py-2 rounded-lg transition-all duration-300 text-base font-georgian"
+                  className="block text-gray-700 hover:text-primary font-bold px-4 py-3 rounded-lg transition-all duration-300 text-base font-georgian touch-target hover:bg-gray-50"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   პანელი
@@ -197,7 +198,7 @@ const Navbar = () => {
                 
                 <Link 
                   to="/profile" 
-                  className="block text-gray-700 hover:text-primary font-bold px-4 py-2 rounded-lg transition-all duration-300 text-base font-georgian"
+                  className="block text-gray-700 hover:text-primary font-bold px-4 py-3 rounded-lg transition-all duration-300 text-base font-georgian touch-target hover:bg-gray-50"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   პროფილი
@@ -205,7 +206,7 @@ const Navbar = () => {
                 
                 <Link 
                   to="/favorites" 
-                  className="block text-gray-700 hover:text-primary font-bold px-4 py-2 rounded-lg transition-all duration-300 text-base font-georgian"
+                  className="block text-gray-700 hover:text-primary font-bold px-4 py-3 rounded-lg transition-all duration-300 text-base font-georgian touch-target hover:bg-gray-50"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   ფავორიტები
