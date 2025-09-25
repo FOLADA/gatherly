@@ -499,34 +499,24 @@ export const getUsersForMeetups = async (currentUserId: string): Promise<{ succe
 
     const excludedIds = [currentUserId, ...(interactedUserIds?.map(i => i.target_user_id) || [])];
 
-    // Handle case where all users have been interacted with
-    if (excludedIds.length > 1) {
-      // Check if there are any users left
-      const { count, error: countError } = await supabase
-        .from('user_profiles')
-        .select('*', { count: 'exact', head: true })
-        .not('id', 'in', `(${excludedIds.join(',')})`);
-
-      if (countError) {
-        console.error('Error counting available users:', countError);
-      }
-
-      if (count === 0) {
-        return { success: true, data: [] }; // No more users available
-      }
-    }
-
-    // Get all user profiles excluding current user and already interacted users
-    const { data: profiles, error: profilesError } = await supabase
+    // Get all user profiles first, then filter in JavaScript
+    // This is more reliable than complex SQL queries with Supabase
+    const { data: allProfiles, error: profilesError } = await supabase
       .from('user_profiles')
       .select('*')
-      .not('id', 'in', `(${excludedIds.join(',')})`)
-      .limit(50); // Limit to prevent overwhelming the user
+      .limit(200); // Get a reasonable number of profiles
 
     if (profilesError) {
       console.error('Error fetching user profiles:', profilesError);
       return { success: false, error: 'Failed to load user profiles' };
     }
+
+    if (!allProfiles || allProfiles.length === 0) {
+      return { success: true, data: [] };
+    }
+
+    // Filter out excluded users in JavaScript
+    const profiles = allProfiles.filter(profile => !excludedIds.includes(profile.id));
 
     if (!profiles || profiles.length === 0) {
       return { success: true, data: [] };
