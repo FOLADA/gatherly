@@ -439,6 +439,10 @@ export const calculateMatchPercentage = (currentUser: UserProfile, targetUser: U
     else if (ageDiff <= 10) score += 10;
     else if (ageDiff <= 15) score += 5;
     totalFactors += 20;
+  } else if (currentUser.age || targetUser.age) {
+    // Give partial score if only one has age
+    score += 10;
+    totalFactors += 20;
   }
 
   // Shared hobbies (30% weight)
@@ -447,6 +451,10 @@ export const calculateMatchPercentage = (currentUser: UserProfile, targetUser: U
     const hobbyScore = (sharedHobbies.length / Math.max(currentUser.hobbies.length, targetUser.hobbies.length)) * 30;
     score += hobbyScore;
     totalFactors += 30;
+  } else if ((currentUser.hobbies && currentUser.hobbies.length > 0) || (targetUser.hobbies && targetUser.hobbies.length > 0)) {
+    // Give partial score if only one has hobbies
+    score += 15;
+    totalFactors += 30;
   }
 
   // Availability compatibility (25% weight)
@@ -454,6 +462,10 @@ export const calculateMatchPercentage = (currentUser: UserProfile, targetUser: U
     const sharedAvailability = currentUser.availability.filter(slot => targetUser.availability?.includes(slot));
     const availabilityScore = (sharedAvailability.length / Math.max(currentUser.availability.length, targetUser.availability.length)) * 25;
     score += availabilityScore;
+    totalFactors += 25;
+  } else if ((currentUser.availability && currentUser.availability.length > 0) || (targetUser.availability && targetUser.availability.length > 0)) {
+    // Give partial score if only one has availability
+    score += 12;
     totalFactors += 25;
   }
 
@@ -466,10 +478,15 @@ export const calculateMatchPercentage = (currentUser: UserProfile, targetUser: U
     else if (socialDiff === 3) score += 10;
     else score += 5;
     totalFactors += 25;
+  } else if (currentUser.social_level || targetUser.social_level) {
+    // Give partial score if only one has social level
+    score += 12;
+    totalFactors += 25;
   }
 
-  // Return percentage (minimum 10% for any profile)
-  return totalFactors > 0 ? Math.max(10, Math.round(score)) : 10;
+  // Return percentage (minimum 15% for any profile, maximum 95%)
+  const percentage = totalFactors > 0 ? Math.round(score) : 15;
+  return Math.max(15, Math.min(95, percentage));
 }
 
 // Get all users for meetups page (excluding current user and already interacted users)
@@ -497,40 +514,65 @@ export const getUsersForMeetups = async (currentUserId: string): Promise<{ succe
       return { success: false, error: 'Failed to load interaction history' };
     }
 
-    const excludedIds = [currentUserId, ...(interactedUserIds?.map(i => i.target_user_id) || [])];
+    console.log('Interacted user IDs:', interactedUserIds);
 
-    // Get all user profiles first, then filter in JavaScript
-    // This is more reliable than complex SQL queries with Supabase
+    // Get all user profiles first
     const { data: allProfiles, error: profilesError } = await supabase
       .from('user_profiles')
       .select('*')
-      .limit(200); // Get a reasonable number of profiles
+      .neq('id', currentUserId) // Exclude current user
+      .limit(100); // Get more initially, then filter
 
     if (profilesError) {
       console.error('Error fetching user profiles:', profilesError);
       return { success: false, error: 'Failed to load user profiles' };
     }
 
-    if (!allProfiles || allProfiles.length === 0) {
-      return { success: true, data: [] };
-    }
-
-    // Filter out excluded users in JavaScript
-    const profiles = allProfiles.filter(profile => !excludedIds.includes(profile.id));
+    // Filter out interacted users in JavaScript (more reliable)
+    const interactedIds = interactedUserIds?.map(i => i.target_user_id) || [];
+    const profiles = allProfiles?.filter(profile => !interactedIds.includes(profile.id)) || [];
+    console.log('Raw profiles fetched:', allProfiles?.length || 0);
+    console.log('Profiles after filtering interactions:', profiles?.length || 0);
 
     if (!profiles || profiles.length === 0) {
+      console.log('No profiles available after filtering interactions');
       return { success: true, data: [] };
     }
 
-    // Filter out profiles with insufficient data
-    const validProfiles = profiles.filter(profile => 
-      profile.name && 
-      profile.age && 
-      profile.age >= 16 && 
-      profile.age <= 100
-    );
+    // Filter out profiles with insufficient data (more lenient filtering)
+    const validProfiles = profiles.filter(profile => {
+      // Basic validation - only require name and reasonable age
+      const hasName = profile.name && profile.name.trim().length > 0;
+      const hasValidAge = profile.age && profile.age >= 16 && profile.age <= 100;
+      
+      // More lenient - only require name OR age, not both
+      const isValid = hasName || hasValidAge;
+      
+      if (!isValid) {
+        console.log('Filtering out invalid profile:', {
+          id: profile.id,
+          name: profile.name,
+          age: profile.age,
+          hasName,
+          hasValidAge
+        });
+      }
+      
+      return isValid;
+    });
 
+    console.log('Valid profiles after filtering:', validProfiles.length);
+
+    // If no valid profiles, try with even more lenient criteria
+    let finalProfiles = validProfiles;
     if (validProfiles.length === 0) {
+      console.log('No valid profiles found with strict criteria, trying lenient filtering...');
+      finalProfiles = profiles.filter(profile => profile.id && profile.id.trim().length > 0);
+      console.log('Profiles with lenient filtering:', finalProfiles.length);
+    }
+
+    if (finalProfiles.length === 0) {
+      console.log('No profiles found even with lenient filtering, returning empty array');
       return { success: true, data: [] };
     }
 
@@ -540,7 +582,7 @@ export const getUsersForMeetups = async (currentUserId: string): Promise<{ succe
       const { data: authData, error: authError } = await supabase
         .from('auth.users')
         .select('id, email')
-        .in('id', validProfiles.map(p => p.id));
+        .in('id', finalProfiles.map(p => p.id));
 
       if (authError) {
         console.warn('Error fetching auth users (non-critical):', authError);
@@ -552,9 +594,9 @@ export const getUsersForMeetups = async (currentUserId: string): Promise<{ succe
     }
 
     // Combine profiles with emails and calculate match percentages
-    const publicProfiles: PublicUserProfile[] = validProfiles.map(profile => {
+    const publicProfiles: PublicUserProfile[] = finalProfiles.map(profile => {
       const authUser = authUsers.find(u => u.id === profile.id);
-      let matchPercentage = 10; // Default minimum
+      let matchPercentage = 15; // Default minimum
       
       try {
         matchPercentage = calculateMatchPercentage(currentUserProfile, profile);
@@ -562,12 +604,22 @@ export const getUsersForMeetups = async (currentUserId: string): Promise<{ succe
         console.warn('Error calculating match percentage for user:', profile.id, error);
       }
       
-      return {
+      // Ensure profile has minimum required data with fallbacks
+      const enhancedProfile = {
         ...profile,
+        name: profile.name || 'ანონიმური მომხმარებელი',
+        age: profile.age || 25, // Default age if missing
+        bio: profile.bio || 'ბიოგრაფია არ არის მითითებული',
+        hobbies: profile.hobbies || [],
+        availability: profile.availability || [],
+        personality: profile.personality || {},
+        social_level: profile.social_level || 3,
         email: authUser?.email,
         match_percentage: matchPercentage,
         interaction_status: null
       };
+      
+      return enhancedProfile;
     });
 
     // Sort by match percentage (highest first), then by creation date
@@ -580,6 +632,14 @@ export const getUsersForMeetups = async (currentUserId: string): Promise<{ succe
       const bDate = new Date(b.created_at || 0).getTime();
       return bDate - aDate;
     });
+
+    console.log('Final public profiles to return:', publicProfiles.length);
+    console.log('Sample profile:', publicProfiles[0] ? {
+      id: publicProfiles[0].id,
+      name: publicProfiles[0].name,
+      age: publicProfiles[0].age,
+      match_percentage: publicProfiles[0].match_percentage
+    } : 'No profiles');
 
     return { success: true, data: publicProfiles };
   } catch (error) {
